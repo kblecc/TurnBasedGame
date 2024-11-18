@@ -1,0 +1,22 @@
+{
+    "area":1, 
+    "level":1,
+    "rounds": [
+        {
+            "order": 1,
+            "enemy":[
+                {
+                    "default_order":1,
+                    "name":"monster 1",
+                    "porperties":{
+                        "attack":100,
+                        "defend":100,
+                        "skills":"111"
+                    }
+                }
+                
+            ]
+        }
+    ]
+       
+}
