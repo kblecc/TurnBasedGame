@@ -1,84 +1,87 @@
 <template>
   <div class="about">
-    <h1>Battle</h1>
+    <div>
+      <h1>Battle</h1>
 
-    <div v-for="(round, roundIndex) in levelDetails.rounds">
-      <div v-if="current.round == roundIndex">
-        <h2>Round {{ round.order }}/{{ levelDetails.rounds.length }}</h2>
-        <div class="col" v-for="(enemy, enemyIndex) in levelDetails.rounds[roundIndex].enemy">
-          <div
-            class="progress"
-            role="progressbar"
-            aria-label="Example with label"
-            aria-valuenow="25"
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            <div class="progress-bar" style="width: 25%">25%</div>
-          </div>
-        </div>
-        <div class="row row-cols-5">
+      <div v-for="(round, roundIndex) in levelDetails.rounds">
+        <div v-if="current.round == roundIndex">
+          <h2>Round {{ round.order }}/{{ levelDetails.rounds.length }}</h2>
           <div class="col" v-for="(enemy, enemyIndex) in levelDetails.rounds[roundIndex].enemy">
-            <div class="card" @click="setActiveEnemyDetails(enemyIndex)">
-              <div class="card-body">
-                <h5 class="card-title">{{ enemy.name }}</h5>
+            <div class="progress">
+              <div class="progress-bar" :style="getEnemyHpPercent(roundIndex, enemyIndex)">
+                {{ current.enemyStatus[roundIndex].enemy[enemyIndex].properties.hp }}/{{
+                  levelDetails.rounds[roundIndex].enemy[enemyIndex].properties.hp
+                }}
+              </div>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" :style="getEnemySpPercent(roundIndex, enemyIndex)">
+                {{ current.enemyStatus[roundIndex].enemy[enemyIndex].properties.sp }}/{{
+                  levelDetails.rounds[roundIndex].enemy[enemyIndex].properties.maxSp
+                }}
               </div>
             </div>
           </div>
-        </div>
+          <div class="row row-cols-5">
+            <div class="col" v-for="(enemy, enemyIndex) in levelDetails.rounds[roundIndex].enemy">
+              <div class="card" @click="setActiveEnemyDetails(enemyIndex)">
+                <div class="card-body">
+                  <h5 class="card-title">{{ enemy.name }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- Enemy Details -->
-        <div class="col" v-for="(enemy, enemyIndex) in levelDetails.rounds[roundIndex].enemy">
-          <div v-if="current.activeEnemyDetails == enemyIndex">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ enemy.name }}</h5>
-                <p class="card-text">{{ enemy.properties }}</p>
+          <!-- Enemy Details -->
+          <div class="col" v-for="(enemy, enemyIndex) in levelDetails.rounds[roundIndex].enemy">
+            <div v-if="current.activeEnemyDetails == enemyIndex">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ enemy.name }}</h5>
+                  <p class="card-text">{{ enemy.properties }}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Character Control -->
-    <div class="row row-cols-5">
+      <!-- Character Control -->
+      <div class="row row-cols-5">
+        <div class="col" v-for="(character, characterIndex) in current.playerStatus">
+          <div
+            class="card"
+            v-touch:swipe.top="characterAttack(characterIndex)"
+          >
+            <div class="card-body" :id="'character' + characterIndex">
+              <h5 class="card-title">{{ character.name }}</h5>
+            </div>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
+              {{ current.playerStatus[characterIndex].properties.hp }}/{{
+                playerDetails.character[characterIndex].properties.hp
+              }}
+            </div>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" :style="getCharacterSpPercent(characterIndex)">
+              {{ current.playerStatus[characterIndex].properties.sp }}/{{
+                playerDetails.character[characterIndex].properties.maxSp
+              }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Character Details -->
       <div class="col" v-for="(character, characterIndex) in current.playerStatus">
-        <div class="card" @click="setActiveCharacterDetails(characterIndex)">
-          <div class="card-body" :id="'character' + characterIndex">
-            <h5 class="card-title">{{ character.name }}</h5>
-          </div>
-        </div>
-        <div
-          class="progress"
-          role="progressbar"
-          aria-label="Example with label"
-          aria-valuenow="25"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">25%</div>
-        </div>
-        <div
-          class="progress"
-          role="progressbar"
-          aria-label="Example with label"
-          aria-valuenow="25"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div class="progress-bar" style="width: 25%">25%</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Character Details -->
-    <div class="col" v-for="(character, characterIndex) in current.playerStatus">
-      <div v-if="current.activeCharacterDetails == characterIndex">
-        <div class="card">
-          <div class="card-body" :id="'character' + characterIndex">
-            <h5 class="card-title">{{ character.name }}</h5>
-            <p class="card-text">{{ character.properties }}</p>
+        <div v-if="current.activeCharacterDetails == characterIndex">
+          <div class="card">
+            <div class="card-body" :id="'character' + characterIndex">
+              <h5 class="card-title">{{ character.name }}</h5>
+              <p class="card-text">{{ character.properties }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -103,6 +106,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
+      action: "",
       current: {
         round: 0,
         activeEnemy: 0,
@@ -118,7 +122,9 @@ export default {
             order: 1,
             name: 'water',
             properties: {
-              hp: 200,
+              hp: 100,
+              sp: 0,
+              maxSp: 100,
               attack: 100,
               attackMode: 'single',
               defend: 100,
@@ -128,7 +134,10 @@ export default {
           {
             order: 2,
             name: 'fire',
-            properties: {hp: 200,
+            properties: {
+              hp: 100,
+              sp: 0,
+              maxSp: 100,
               attack: 100,
               attackMode: 'single',
               defend: 100,
@@ -138,7 +147,10 @@ export default {
           {
             order: 3,
             name: 'light',
-            properties: {hp: 200,
+            properties: {
+              hp: 100,
+              sp: 0,
+              maxSp: 100,
               attack: 100,
               attackMode: 'single',
               defend: 100,
@@ -148,7 +160,10 @@ export default {
           {
             order: 4,
             name: 'dark',
-            properties: {hp: 200,
+            properties: {
+              hp: 100,
+              sp: 0,
+              maxSp: 100,
               attack: 100,
               attackMode: 'single',
               defend: 100,
@@ -158,7 +173,10 @@ export default {
           {
             order: 5,
             name: 'leaf',
-            properties: {hp: 200,
+            properties: {
+              hp: 100,
+              sp: 0,
+              maxSp: 100,
               attack: 100,
               attackMode: 'single',
               defend: 100,
@@ -178,6 +196,11 @@ export default {
                 default_order: 1,
                 name: 'monster 11',
                 properties: {
+                  hp: 100,
+
+                  sp: 0,
+                  maxSp: 100,
+
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -188,6 +211,10 @@ export default {
                 default_order: 2,
                 name: 'monster 12',
                 properties: {
+                  hp: 100,
+
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -198,6 +225,9 @@ export default {
                 default_order: 3,
                 name: 'monster 13',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -208,6 +238,9 @@ export default {
                 default_order: 4,
                 name: 'monster 14',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -218,6 +251,9 @@ export default {
                 default_order: 5,
                 name: 'monster 15',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -233,6 +269,9 @@ export default {
                 default_order: 1,
                 name: 'monster 21',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -243,6 +282,9 @@ export default {
                 default_order: 2,
                 name: 'monster 22',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -253,6 +295,9 @@ export default {
                 default_order: 3,
                 name: 'monster 23',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -263,6 +308,9 @@ export default {
                 default_order: 4,
                 name: 'monster 24',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -273,6 +321,9 @@ export default {
                 default_order: 5,
                 name: 'monster 25',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -288,6 +339,9 @@ export default {
                 default_order: 1,
                 name: 'monster 31',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -298,6 +352,9 @@ export default {
                 default_order: 2,
                 name: 'monster 32',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -308,6 +365,9 @@ export default {
                 default_order: 3,
                 name: 'monster 33',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -318,6 +378,9 @@ export default {
                 default_order: 4,
                 name: 'monster 34',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -328,6 +391,9 @@ export default {
                 default_order: 5,
                 name: 'monster 35',
                 properties: {
+                  hp: 100,
+                  sp: 0,
+                  maxSp: 100,
                   attack: 100,
                   attackMode: 'single',
                   defend: 100,
@@ -357,6 +423,7 @@ export default {
         )
         .then((response) => (this.levelDetails = response.data))
     },
+    // Control
     setActiveCharacterDetails(index) {
       if (index !== this.current.activeCharacterDetails) {
         this.current.activeCharacterDetails = index
@@ -371,12 +438,61 @@ export default {
         this.current.activeEnemyDetails = -1
       }
     },
-    getCharacterHpPercent(index){
-      return "width:"+this.current.playerStatus[index]/this.playerDetails.character[index];
-    }
+    clearActiveCharacterDetails() {
+      this.current.activeEnemyDetails = -1
+    },
+    characterAttack(index){console.log("atk",index);
+      if (this.current.activeEnemy!==-1){
+        this.current.enemyStatus[this.current.round].enemy[this.current.activeEnemy].properties.hp = this.current.enemyStatus[this.current.round].enemy[this.current.activeEnemy].properties.hp - this.current.playerStatus[index].properties.attack;
+      } else {
+        this.current.enemyStatus[this.current.round].enemy[0].properties.hp = this.current.enemyStatus[this.current.round].enemy[this.current.activeEnemy].properties.hp - this.current.playerStatus[index].properties.attack;
+      }
+
+    },
+    // Character
+    getCharacterHpPercent(index) {
+      return (
+        'width:' +
+        (this.current.playerStatus[index].properties.hp /
+          this.playerDetails.character[index].properties.hp) *
+          100 +
+        '%'
+      )
+    },
+    getCharacterSpPercent(index) {
+      return (
+        'width:' +
+        (this.current.playerStatus[index].properties.sp /
+          this.playerDetails.character[index].properties.maxSp) *
+          100 +
+        '%'
+      )
+    },
+    // Enemy
+    getEnemyHpPercent(round, index) {
+      return (
+        'width:' +
+        (this.current.enemyStatus[round].enemy[index].properties.hp /
+          this.levelDetails.rounds[round].enemy[index].properties.hp) *
+          100 +
+        '%'
+      )
+    },
+
+    getEnemySpPercent(round, index) {
+      return (
+        'width:' +
+        (this.current.enemyStatus[round].enemy[index].properties.sp /
+          this.levelDetails.rounds[round].enemy[index].properties.maxSp) *
+          100 +
+        '%'
+      )
+    },
   },
-  mounted() {
+  created() {
     this.current.playerStatus = this.playerDetails.character
+    this.current.enemyStatus = this.levelDetails.rounds
+
     console.log(this.current.playerStatus)
   },
 }
