@@ -1,0 +1,216 @@
+{
+    "area": 1,
+    "level": 1,
+    "rounds": [
+      {
+        "order": 1,
+        "enemy": [
+          {
+            "default_order": 1,
+            "name": "monster 11",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 2,
+            "name": "monster 12",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 3,
+            "name": "monster 13",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 4,
+            "name": "monster 14",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 5,
+            "name": "monster 15",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "enemy": [
+          {
+            "default_order": 1,
+            "name": "monster 21",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 2,
+            "name": "monster 22",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 3,
+            "name": "monster 23",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 4,
+            "name": "monster 24",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 5,
+            "name": "monster 25",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "enemy": [
+          {
+            "default_order": 1,
+            "name": "monster 31",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 2,
+            "name": "monster 32",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 3,
+            "name": "monster 33",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 4,
+            "name": "monster 34",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          },
+          {
+            "default_order": 5,
+            "name": "monster 35",
+            "properties": {
+              "hp": 100,
+              "sp": 0,
+              "maxSp": 100,
+              "attack": 100,
+              "attackMode": "single",
+              "defend": 100,
+              "skills": "111"
+            }
+          }
+        ]
+      }
+    ]
+  }
