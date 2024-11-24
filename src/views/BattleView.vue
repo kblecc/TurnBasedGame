@@ -1,4 +1,41 @@
 <template>
+  <div v-if="checkDefeat()" class="overlay ">
+    <div class="overlay-content"><h1>Defeat</h1>
+    <button
+      type="button"
+      class="btn btn-secondary"
+
+    >
+      Back to Map
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#exampleModal"
+    >
+      Try Again
+    </button></div>
+
+  </div>
+  <div v-if="checkWin()&& !checkDefeat()"  class="overlay "><div class="overlay-content">
+    <h1>win</h1>
+    <button
+      type="button"
+      class="btn btn-secondary"
+
+    >
+      Back to Map
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#exampleModal"
+    >
+      Try Again
+    </button></div>
+  </div>
   <div class="about">
     <div>
       <h1>Wave {{ current.wave + 1 }}</h1>
@@ -22,7 +59,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Battle Paused</h1>
               <button
                 type="button"
                 class="btn-close"
@@ -36,10 +73,6 @@
               <RouterLink to="/item">Items</RouterLink>
               <RouterLink to="/about">About</RouterLink>
               <RouterLink to="/battle">Battle</RouterLink>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
             </div>
           </div>
         </div>
@@ -64,9 +97,9 @@
             <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
               <div
                 class="card"
-                @touchstart="setActiveEnemyDetails(enemyIndex)"
-                @touchend="clearActiveEnemyDetails()"
-                @click="setActiveEnemyAction(enemyIndex)"
+                @touchstart="touchStartEnemyHandling(enemyIndex)"
+                @touchend="touchEndEnemyHandling()"
+                @click="setTargetEnemy(enemyIndex)"
               >
                 <div class="card-body">
                   <h5 class="card-title">{{ enemy.name }}</h5>
@@ -97,8 +130,8 @@
           <div v-if="current.turnPlayerStatus[characterIndex].action == ''">
             <div
               class="card characterCard"
-              @touchstart="setActiveCharacterDetails(characterIndex)"
-              @touchend="clearActiveCharacterDetails()"
+              @touchstart="touchStartCharacterHandling(characterIndex)"
+              @touchend="touchEndCharacterHandling()"
               v-touch="{
                 left: () => swipe('Left'),
                 right: () => swipe('Right'),
@@ -122,8 +155,26 @@
           <div v-else-if="current.turnPlayerStatus[characterIndex].action == 'defend'">
             <div
               class="card characterCard"
-              @touchstart="setActiveCharacterDetails(characterIndex)"
-              @touchend="clearActiveCharacterDetails()"
+              @touchstart="touchStartCharacterHandling(characterIndex)"
+              @touchend="touchEndCharacterHandling()"
+            >
+              <div class="card-body text-bg-warning" :id="'character' + characterIndex">
+                <p class="card-title">{{ character.name }}</p>
+              </div>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
+                {{ current.playerStatus[characterIndex].properties.hp }}/{{
+                  playerDetails.character[characterIndex].properties.hp
+                }}
+              </div>
+            </div>
+          </div>
+          <div v-else-if="current.playerStatus[characterIndex].properties.hp === 0">
+            <div
+              class="card characterCard"
+              @touchstart="touchStartCharacterHandling(characterIndex)"
+              @touchend="touchEndCharacterHandling()"
             >
               <div class="card-body text-bg-warning" :id="'character' + characterIndex">
                 <p class="card-title">{{ character.name }}</p>
@@ -140,8 +191,8 @@
           <div v-else>
             <div
               class="card characterCard"
-              @touchstart="setActiveCharacterDetails(characterIndex)"
-              @touchend="clearActiveCharacterDetails()"
+              @touchstart="touchStartCharacterHandling(characterIndex)"
+              @touchend="touchEndCharacterHandling()"
             >
               <div class="card-body text-bg-secondary" :id="'character' + characterIndex">
                 <p class="card-title">{{ character.name }}</p>
@@ -174,6 +225,30 @@
 </template>
 
 <style scoped>
+.overlay {
+ position: absolute; /* Position it fixed to the viewport */
+  top: 0; /* Align to the top */
+  left: 0; /* Align to the left */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex; /* Use flexbox to center content */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+
+
+
+  transition: visibility 0s, opacity 0.5s linear; /* Smooth transition */
+  z-index: 1050;
+}
+/* Overlay content styles */
+.overlay-content {
+  color: white; /* Text color */
+  text-align: center; /* Center text */
+  padding: 20px; /* Padding around content */
+  background: rgba(0, 0, 0, 0.8); /* Slightly darker background for content */
+  border-radius: 8px; /* Rounded corners */
+}
 .characterCard {
   min-height: 20svh;
 }
@@ -216,8 +291,8 @@ export default {
       current: {
         turn: 1,
         wave: 0,
-        activeEnemy: 0,
-        activeCharacter: 0,
+        activeEnemy: -1,
+        activeCharacter: -1,
         activeEnemyDetails: -1,
         activeCharacterDetails: -1,
         playerStatus: [],
@@ -321,13 +396,18 @@ export default {
         )
         .then((response) => {
           // handle success
-          this.levelDetails = response.data
+          this.levelDetails = JSON.parse(JSON.stringify(response.data))
+          console.log(this.levelDetails)
           this.current.enemyStatus = JSON.parse(JSON.stringify(this.levelDetails.waves))
-          console.log(response)
         })
     },
     delay(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms))
+    },
+    noOfNonDefeatEnemy() {
+      return this.current.enemyStatus[this.current.wave].enemy.filter(
+        (enemy) => enemy.properties.hp > 0,
+      ).length
     },
     // wave Control
 
@@ -343,31 +423,51 @@ export default {
         { action: '' },
         { action: '' },
       ]
+      for (let i=0;i<this.current.playerStatus.length;i++){
+        if (this.current.playerStatus[i].properties.hp===0){
+          this.current.turnPlayerStatus[i] ={ action: 'defeat' }
+        }
+      }
     },
     newTurn() {
-      this.current.trun = this.current.trun + 1
+      this.current.turn = this.current.turn + 1
       this.resetTurnPlayerStatus()
     },
-    checkEnemyDead() {},
+
     // Wave Complete
+    newWave() {
+      this.current.wave = this.current.wave + 1
+    },
     checkWaveComplete() {
-      console.log(this.current.enemyStatus)
-      this.current.enemyStatus[this.current.wave].enemy.forEach((enemy) => {
-        if (enemy.properties.hp !== 0) {
-          return false
-        }
-      })
-      return true
+      return this.current.enemyStatus[this.current.wave].enemy.every(
+        (enemy) => enemy.properties.hp === 0,
+      )
+    },
+    checkDefeat() {
+      return this.current.playerStatus.every((character) => character.properties.hp === 0)
+    },
+    checkWin(){
+      let winWaves = this.levelDetails.waves.length||11111111
+      console.log(winWaves)
+      return this.current.wave+1>winWaves
     },
     // Enemy Action
 
     async enemyRespond() {
-      for (const enemy of this.levelDetails.waves[this.current.wave].enemy) {
-        this.enemyAttackPriority(enemy)
+      for (let i = 0; i < this.levelDetails.waves[this.current.wave].enemy.length; i++) {
+        if (this.current.enemyStatus[this.current.wave].enemy[i].properties.hp > 0) {
+          this.enemyAttackPriority(this.current.enemyStatus[this.current.wave].enemy[i])
+        }
 
         await this.delay(1000) // Wait for 2 seconds before the next iteration
       }
-      this.newTurn()
+
+      if (this.checkWaveComplete()) {
+        this.newWave()
+        this.newTurn()
+      } else {
+        this.newTurn()
+      }
     },
     enemyAttackPriority(enemy) {
       switch (enemy.properties.attackMode) {
@@ -375,18 +475,15 @@ export default {
           let actionMade = false
           // First Proprity
           if (actionMade === false) {
-            console.log('1st', enemy, this.current.playerStatus)
             actionMade = this.enemyFirstPriorityAttack(enemy)
           }
 
           // Second priority: No defend character
           if (actionMade === false) {
-            console.log('2nd', enemy, this.current.playerStatus)
             actionMade = this.enemySecondPriorityAttack(enemy)
           }
           //Final priority: Random attack, I want to make defend, TODO
           if (actionMade === false) {
-            console.log('3rd', enemy, this.current.playerStatus)
             let character = Math.floor(Math.random() * 5)
             this.current.playerStatus[character].properties.hp =
               this.current.playerStatus[character].properties.hp - enemy.properties.attack
@@ -520,67 +617,87 @@ export default {
           this.current.turnPlayerStatus[i].action !== 'defend' &&
           this.current.playerStatus[i].properties.hp !== 0
         ) {
-          this.current.playerStatus[i].properties.hp =
-            this.current.playerStatus[i].properties.hp - enemy.properties.attack
+          if (this.current.playerStatus[i].properties.defend - enemy.properties.attack > 0) {
+            this.current.playerStatus[i].properties.hp =
+              this.current.playerStatus[i].properties.hp - enemy.properties.attack
+          } else {
+            this.current.playerStatus[i].properties.hp = 0
+          }
           return true
         }
       }
       return false
     },
     // Player Action
-    setActiveCharacterDetails(index) {
+    touchStartCharacterHandling(index) {
       this.pressTimer = setTimeout(() => {
         this.current.activeCharacterDetails = index
       }, 500)
     },
-    clearActiveCharacterDetails() {
+    touchEndCharacterHandling() {
       clearTimeout(this.pressTimer)
       this.current.activeCharacterDetails = -1
     },
-    setActiveEnemyDetails(index) {
+    touchStartEnemyHandling(index) {
       this.pressTimer = setTimeout(() => {
         this.current.activeEnemyDetails = index
       }, 500)
     },
-    clearActiveEnemyDetails() {
+    touchEndEnemyHandling() {
       clearTimeout(this.pressTimer)
       this.current.activeEnemyDetails = -1
     },
     characterAttack(index) {
       let atk = this.playerDetails.character[index].properties.attack
       let bonus = 50
-      //attack attribute power
-      switch (this.playerDetails.character[index].properties.attribute) {
-        case 'fire':
-          if (this.playerDetails.character[index].properties.attribute === 'wood') {
-            atk = atk * (1 + bonus / 100)
-          }
-          break
-        case 'water':
-          if (this.playerDetails.character[index].properties.attribute === 'fire') {
-            atk = atk * (1 + bonus / 100)
-          }
-          break
-        case 'wood':
-          if (this.playerDetails.character[index].properties.attribute === 'water') {
-            atk = atk * (1 + bonus / 100)
-          }
-          break
-        case 'light':
-          if (this.playerDetails.character[index].properties.attribute === 'dark') {
-            atk = atk * (1 + bonus / 100)
-          }
-          break
-        case 'dark':
-          if (this.playerDetails.character[index].properties.attribute === 'light') {
-            atk = atk * (1 + bonus / 100)
-          }
-          break
-        default:
-      }
+
       if (this.playerDetails.character[index].properties.attackMode === 'single') {
         if (this.current.activeEnemy !== -1) {
           this.current.turnPlayerStatus[index].action = 'attack'
+          //attack attribute power
+          switch (this.playerDetails.character[index].properties.attribute) {
+            case 'fire':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy]
+                  .properties.attribute === 'wood'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'water':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy]
+                  .properties.attribute === 'fire'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'wood':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy]
+                  .properties.attribute === 'water'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'light':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy]
+                  .properties.attribute === 'dark'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'dark':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy]
+                  .properties.attribute === 'light'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            default:
+          }
           this.current.enemyStatus[this.current.wave].enemy[
             this.current.activeEnemy
           ].properties.hp =
@@ -596,36 +713,121 @@ export default {
           }
         } else {
           this.current.turnPlayerStatus[index].action = 'attack'
-          this.current.enemyStatus[this.current.wave].enemy[0].properties.hp =
-            this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy].properties
-              .hp - atk
-          if (
-            this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy].properties
-              .hp < 0
-          ) {
-            this.current.enemyStatus[this.current.wave].enemy[
-              this.current.activeEnemy
-            ].properties.hp = 0
+          let selectedEnemy = 0
+          for (let i = 0; i < this.current.enemyStatus[this.current.wave].enemy.length; i++) {
+            if (this.current.enemyStatus[this.current.wave].enemy[i].properties.hp > 0) {
+              selectedEnemy = i
+
+              break
+            }
+          }
+
+          //attack attribute power
+          switch (this.playerDetails.character[index].properties.attribute) {
+            case 'fire':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties
+                  .attribute === 'wood'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'water':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties
+                  .attribute === 'fire'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'wood':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties
+                  .attribute === 'water'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'light':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties
+                  .attribute === 'dark'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            case 'dark':
+              if (
+                this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties
+                  .attribute === 'light'
+              ) {
+                atk = atk * (1 + bonus / 100)
+              }
+              break
+            default:
+          }
+          this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties.hp =
+            this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties.hp - atk
+          if (this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties.hp < 0) {
+            this.current.enemyStatus[this.current.wave].enemy[selectedEnemy].properties.hp = 0
           }
         }
       } else if (this.playerDetails.character[index].properties.attackMode === 'multi') {
+        console.log('attack')
         this.current.turnPlayerStatus[index].action = 'attack'
+
         this.current.enemyStatus[this.current.wave].enemy.forEach((enemy) => {
-          enemy.properties.hp =
-            enemy.properties.hp - atk / this.current.enemyStatus[this.current.wave].enemy.length
-          if (
-            this.current.enemyStatus[this.current.wave].enemy[this.current.activeEnemy].properties
-              .hp < 0
-          ) {
-            this.current.enemyStatus[this.current.wave].enemy[
-              this.current.activeEnemy
-            ].properties.hp = 0
+          let atkBouns = 1
+          //attack attribute power
+          let atk = this.playerDetails.character[index].properties.attack
+          switch (this.playerDetails.character[index].properties.attribute) {
+            case 'fire':
+              if (enemy.properties.attribute === 'wood') {
+                atkBouns = 1 + bonus / 100
+              }
+              break
+            case 'water':
+              if (enemy.properties.attribute === 'fire') {
+                atkBouns = 1 + bonus / 100
+              }
+              break
+            case 'wood':
+              if (enemy.properties.attribute === 'water') {
+                atkBouns = 1 + bonus / 100
+              }
+              break
+            case 'light':
+              if (enemy.properties.attribute === 'dark') {
+                atkBouns = 1 + bonus / 100
+              }
+              break
+            case 'dark':
+              if (enemy.properties.attribute === 'light') {
+                atkBouns = 1 + bonus / 100
+              }
+              break
+            default:
+          }
+          //Calculate HP
+          let noOfEnemy = this.noOfNonDefeatEnemy()
+          let hpToBeDeduct = atkBouns * (atk / noOfEnemy)
+
+          if (enemy.properties.hp - hpToBeDeduct >= 0) {
+            console.log('1', atkBouns, atk, noOfEnemy, hpToBeDeduct, enemy.properties.hp)
+            enemy.properties.hp = enemy.properties.hp - hpToBeDeduct
+          } else {
+            console.log('2', enemy.properties.hp)
+            enemy.properties.hp = 0
           }
         })
       }
-      console.log(this.checkTurnComplete())
-      if (this.checkTurnComplete()) {
-        this.enemyRespond()
+      if (this.checkWaveComplete()) {
+        this.newWave()
+        this.newTurn()
+      } else {
+        if (this.checkTurnComplete()) {
+          this.enemyRespond()
+        }
       }
     },
     characterDefend(index) {
@@ -637,6 +839,14 @@ export default {
     characterActiveSkill(index) {
       //not yet
     },
+    //
+    setTargetEnemy(index) {
+      if (this.current.activeEnemy === index) {
+        this.current.activeEnemy = -1
+      } else {
+        this.current.activeEnemy = index
+      }
+    },
     // Character Display
     getCharacterHpPercent(index) {
       return (
@@ -647,7 +857,6 @@ export default {
         '%'
       )
     },
-
     // Enemy Display
     getEnemyHpPercent(wave, index) {
       return (
@@ -662,7 +871,6 @@ export default {
   created() {
     this.getLevelDetails()
     this.current.playerStatus = JSON.parse(JSON.stringify(this.playerDetails.character))
-    console.log(this.current.playerStatus)
   },
 }
 </script>
