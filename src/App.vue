@@ -32,11 +32,7 @@ import { RouterLink, RouterView } from 'vue-router'
             ></button>
           </div>
           <div class="modal-body">
-            <RouterLink to="/">Home</RouterLink>
-            <RouterLink to="/character">Character</RouterLink>
-            <RouterLink to="/item">Items</RouterLink>
-            <RouterLink to="/about">About</RouterLink>
-            <RouterLink to="/battle">Battle</RouterLink>
+   
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

@@ -1,40 +1,31 @@
 <template>
-  <div v-if="checkDefeat()" class="overlay ">
-    <div class="overlay-content"><h1>Defeat</h1>
-    <button
-      type="button"
-      class="btn btn-secondary"
-
-    >
-      Back to Map
-    </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      data-bs-toggle="modal"
-      data-bs-target="#exampleModal"
-    >
-      Try Again
-    </button></div>
-
+  <div v-if="checkDefeat()" class="overlay">
+    <div class="overlay-content">
+      <h1>Defeat</h1>
+      <button type="button" class="btn btn-secondary">Back to Map</button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
+      >
+        Try Again
+      </button>
+    </div>
   </div>
-  <div v-if="checkWin()&& !checkDefeat()"  class="overlay "><div class="overlay-content">
-    <h1>win</h1>
-    <button
-      type="button"
-      class="btn btn-secondary"
-
-    >
-      Back to Map
-    </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      data-bs-toggle="modal"
-      data-bs-target="#exampleModal"
-    >
-      Try Again
-    </button></div>
+  <div v-if="checkWin() && !checkDefeat()" class="overlay">
+    <div class="overlay-content">
+      <h1>win</h1>
+      <button type="button" class="btn btn-secondary">Back to Map</button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
+      >
+        Try Again
+      </button>
+    </div>
   </div>
   <div class="about">
     <div>
@@ -44,14 +35,14 @@
         type="button"
         class="btn btn-primary"
         data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
+        data-bs-target="#battleModal"
         id="menuButton"
       >
         menu
       </button>
       <div
         class="modal fade"
-        id="exampleModal"
+        id="battleModal"
         tabindex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
@@ -79,19 +70,20 @@
       </div>
       <div v-for="(wave, waveIndex) in levelDetails.waves">
         <div v-if="current.wave == waveIndex">
-          <h2>wave {{ wave.order }}/{{ levelDetails.waves.length }}</h2>
-
-          <!-- Enemy Area -->
-          <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
-            <!-- HP -->
-            <div class="progress">
-              <div class="progress-bar" :style="getEnemyHpPercent(waveIndex, enemyIndex)">
-                {{ current.enemyStatus[waveIndex].enemy[enemyIndex].properties.hp }}/{{
-                  levelDetails.waves[waveIndex].enemy[enemyIndex].properties.hp
-                }}
+          <div class="row row-cols-5">
+            <!-- Enemy Area -->
+            <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
+              <!-- HP -->
+              <div class="progress">
+                <div class="progress-bar" :style="getEnemyHpPercent(waveIndex, enemyIndex)">
+                  {{ current.enemyStatus[waveIndex].enemy[enemyIndex].properties.hp }}/{{
+                    levelDetails.waves[waveIndex].enemy[enemyIndex].properties.hp
+                  }}
+                </div>
               </div>
             </div>
           </div>
+
           <!-- Enemy Art -->
           <div class="row row-cols-5">
             <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
@@ -121,9 +113,7 @@
           </div>
         </div>
       </div>
-      <br />
-      {{ current.turn }}<br />
-      {{ current.turnPlayerStatus }}
+
       <!-- Character Control -->
       <div id="characterControl" class="row row-cols-5 align-items-end">
         <div class="col" v-for="(character, characterIndex) in current.playerStatus">
@@ -226,7 +216,7 @@
 
 <style scoped>
 .overlay {
- position: absolute; /* Position it fixed to the viewport */
+  position: absolute; /* Position it fixed to the viewport */
   top: 0; /* Align to the top */
   left: 0; /* Align to the left */
   width: 100%; /* Full width */
@@ -236,9 +226,9 @@
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
 
-
-
-  transition: visibility 0s, opacity 0.5s linear; /* Smooth transition */
+  transition:
+    visibility 0s,
+    opacity 0.5s linear; /* Smooth transition */
   z-index: 1050;
 }
 /* Overlay content styles */
@@ -276,6 +266,15 @@ h2 {
   position: fixed;
   top: 8px;
   right: 8px;
+}
+/* Define the fade animation for entering and leaving */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s ease;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  transform: translateY(30px);
+  opacity: 0;
 }
 </style>
 
@@ -423,9 +422,9 @@ export default {
         { action: '' },
         { action: '' },
       ]
-      for (let i=0;i<this.current.playerStatus.length;i++){
-        if (this.current.playerStatus[i].properties.hp===0){
-          this.current.turnPlayerStatus[i] ={ action: 'defeat' }
+      for (let i = 0; i < this.current.playerStatus.length; i++) {
+        if (this.current.playerStatus[i].properties.hp === 0) {
+          this.current.turnPlayerStatus[i] = { action: 'defeat' }
         }
       }
     },
@@ -446,10 +445,10 @@ export default {
     checkDefeat() {
       return this.current.playerStatus.every((character) => character.properties.hp === 0)
     },
-    checkWin(){
-      let winWaves = this.levelDetails.waves.length||11111111
+    checkWin() {
+      let winWaves = this.levelDetails.waves.length || 11111111
       console.log(winWaves)
-      return this.current.wave+1>winWaves
+      return this.current.wave + 1 > winWaves
     },
     // Enemy Action
 
@@ -499,7 +498,7 @@ export default {
       }
     },
     enemyFirstPriorityAttack(enemy) {
-      let bonus = 50
+      let bonus = 30
       switch (enemy.properties.attribute) {
         case 'fire':
           for (let i = 0; i < 5; i++) {
@@ -508,16 +507,9 @@ export default {
               this.current.turnPlayerStatus[i].action !== 'defend' &&
               this.current.playerStatus[i].properties.hp !== 0
             ) {
-              if (
-                this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100) <
-                0
-              ) {
-                this.current.playerStatus[i].properties.hp =
-                  this.current.playerStatus[i].properties.hp +
-                  this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100)
-              }
+              this.current.playerStatus[i].properties.hp =
+                this.current.playerStatus[i].properties.hp -
+                enemy.properties.attack * (1 + bonus / 100)
               return true
             }
           }
@@ -530,16 +522,10 @@ export default {
               this.current.turnPlayerStatus[i].action !== 'defend' &&
               this.current.playerStatus[i].properties.hp !== 0
             ) {
-              if (
-                this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100) <
-                0
-              ) {
-                this.current.playerStatus[i].properties.hp =
-                  this.current.playerStatus[i].properties.hp +
-                  this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100)
-              }
+              this.current.playerStatus[i].properties.hp =
+                this.current.playerStatus[i].properties.hp -
+                enemy.properties.attack * (1 + bonus / 100)
+
               return true
             }
           }
@@ -551,16 +537,9 @@ export default {
               this.current.turnPlayerStatus[i].action !== 'defend' &&
               this.current.playerStatus[i].properties.hp !== 0
             ) {
-              if (
-                this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100) <
-                0
-              ) {
-                this.current.playerStatus[i].properties.hp =
-                  this.current.playerStatus[i].properties.hp +
-                  this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100)
-              }
+              this.current.playerStatus[i].properties.hp =
+                this.current.playerStatus[i].properties.hp -
+                enemy.properties.attack * (1 + bonus / 100)
               return true
             }
           }
@@ -572,16 +551,9 @@ export default {
               this.current.turnPlayerStatus[i].action !== 'defend' &&
               this.current.playerStatus[i].properties.hp !== 0
             ) {
-              if (
-                this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100) <
-                0
-              ) {
-                this.current.playerStatus[i].properties.hp =
-                  this.current.playerStatus[i].properties.hp +
-                  this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100)
-              }
+              this.current.playerStatus[i].properties.hp =
+                this.current.playerStatus[i].properties.hp -
+                enemy.properties.attack * (1 + bonus / 100)
               return true
             }
           }
@@ -593,16 +565,9 @@ export default {
               this.current.turnPlayerStatus[i].action !== 'defend' &&
               this.current.playerStatus[i].properties.hp !== 0
             ) {
-              if (
-                this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100) <
-                0
-              ) {
-                this.current.playerStatus[i].properties.hp =
-                  this.current.playerStatus[i].properties.hp +
-                  this.current.playerStatus[i].properties.defend -
-                  enemy.properties.attack * (1 + bonus / 100)
-              }
+              this.current.playerStatus[i].properties.hp =
+                this.current.playerStatus[i].properties.hp -
+                enemy.properties.attack * (1 + bonus / 100)
               return true
             }
           }
