@@ -1,49 +1,57 @@
-<script setup></script>
-
 <template>
-  <div :style="backgroundStyle" class="story-container" @click="nextItem">
-    <div v-if="currentType === 'fullScreen'" class="full-screen">
-      <img :src="currentSrc" alt="Story Image" />
+  <div>
+    <!-- Comic Mode -->
+    <div v-if="currentStory.type === 'fullScreen'" class="comic-mode" @click="nextStory">
+      <img :src="currentStory.src" alt="Story Image" />
     </div>
-    <div v-else-if="currentType === 'conversation'" class="conversation">
-      <div class="character-image">
-        <img :src="currentCharacterSrc" alt="Character Image" />
+
+    <!-- Conversation Mode -->
+    <div v-else-if="currentStory.type === 'conversation'" class="conversation-mode">
+      <img :src="currentConversation.src.background" alt="Background Image" class="background" />
+      <div class="character">
+        <img :src="currentConversation.src.character" alt="Character Image" />
       </div>
-      <div class="dialogue">
-        <p>{{ currentCharacter }}: {{ currentSaid }}</p>
+      <p class="dialogue">{{ parseText(currentConversation.said) }}</p>
+      <div v-if="currentConversation.option" class="options">
+        <button
+          v-for="(opt, index) in currentConversation.option"
+          :key="index"
+          @click="gotoConversation(opt.goto)"
+        >
+          {{ opt.option }}
+        </button>
       </div>
+      <button v-else @click="nextConversation">Next</button>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
   data() {
     return {
       story: [
         {
-          id: 1,
+          id: 0,
           type: 'fullScreen',
           src: 'https://placehold.co/600x400?text=1',
         },
         {
-          id: 2,
+          id: 1,
           type: 'fullScreen',
           src: 'https://placehold.co/600x400?text=2',
         },
         {
-          id: 3,
+          id: 2,
           type: 'fullScreen',
           src: 'https://placehold.co/600x400?text=3',
         },
         {
-          id: 4,
+          id: 3,
           type: 'conversation',
           conversation: [
             {
-              conversationID: 1,
+              conversationID: 0,
               character: 'Name',
               said: 'Hello',
               src: {
@@ -52,7 +60,7 @@ export default {
               },
             },
             {
-              conversationID: 2,
+              conversationID: 1,
               character: 'Name1',
               said: 'Hello,{playerName}',
               src: {
@@ -61,12 +69,12 @@ export default {
               },
             },
             {
-              conversationID: 3,
+              conversationID: 2,
               character: 'Name',
-              said: 'hey',
+              said: 'Hey',
               option: [
-                { option: 'ddddd', goto: 5 },
-                { option: 'ddddd', goto: 6 },
+                { option: 'Option 1', goto: 3 },
+                { option: 'Option 2', goto: 4 },
               ],
               src: {
                 background: 'https://placehold.co/600x400?text=8',
@@ -74,7 +82,7 @@ export default {
               },
             },
             {
-              conversationID: 5,
+              conversationID: 3,
               character: 'Nameoption1',
               said: 'Hello',
               src: {
@@ -83,7 +91,7 @@ export default {
               },
             },
             {
-              conversationID: 6,
+              conversationID: 4,
               character: 'Name1option2',
               said: 'Hello,{playerName}',
               src: {
@@ -94,135 +102,70 @@ export default {
           ],
         },
       ],
-      currentIndex: 0,
-      conversationIndex: 0
-    }
+      currentStoryIndex: 0,
+      currentConversationIndex: 0,
+      playerName: 'Player',
+    };
   },
   computed: {
-    currentType() {
-      return this.story[this.currentIndex].type
+    currentStory() {
+      return this.story[this.currentStoryIndex];
     },
-    currentSrc() {
-      return this.story[this.currentIndex].src
-    },
-    currentCharacter() {
-      if (this.currentType === 'conversation') {
-        return this.story[this.currentIndex].conversation[this.conversationIndex].character
-      }
-      return ''
-    },
-    currentSaid() {
-      if (this.currentType === 'conversation') {
-        return this.story[this.currentIndex].conversation[this.conversationIndex].said
-      }
-      return ''
-    },
-    currentCharacterSrc() {
-      if (this.currentType === 'conversation') {
-        return this.story[this.currentIndex].conversation[this.conversationIndex].src.character
-      }
-      return ''
-    },
-    backgroundStyle() {
-      if (this.currentType === 'conversation') {
-        return {
-          backgroundImage: `url(${this.story[this.currentIndex].conversation[this.conversationIndex].src.background})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          height: '100vh',
-          width: '100vw',
-        }
-      }
-      return {}
-    },
-    conversationIndex() {
-      if (this.currentType === 'conversation') {
-        return this.story[this.currentIndex].conversation.findIndex(
-          (conv) => conv.conversationID === this.currentConversationID,
-        )
-      }
-
-      return 0
-    },
-    currentConversationID() {
-      console.log(this.conversationIndex);
-      if (
-        this.currentType === 'conversation' &&
-        this.story[this.currentIndex].conversation[this.conversationIndex].conversationID
-      ) {
-        return this.story[this.currentIndex].conversation[this.conversationIndex].conversationID
-      }
-      return null
+    currentConversation() {
+      return this.currentStory.conversation[this.currentConversationIndex];
     },
   },
   methods: {
-    // Connection
-    getLevelDetails() {
-      axios
-        .get(
-          'https://raw.githubusercontent.com/kblecc/StaticAsserts/refs/heads/TurnBasedGame/' +
-            this.$route.params.id +
-            '.json',
-        )
-        .then((response) => {
-          // handle success
-          this.levelDetails = response.data
-          this.current.enemyStatus = this.levelDetails.waves
-          console.log(response)
-        })
-    },
-    nextItem() {
-      if (this.currentType === 'fullScreen') {
-        this.currentIndex++
-      } else if (this.current.type === 'conversation') {
-        if (this.conversationIndex < this.story[this.currentIndex].conversation.length - 1) {
-          this.conversationIndex++
-        } else {
-          this.currentIndex++ // Move to the next item after the last conversation
-          this.conversationIndex = 0 // Reset conversation index for the next item
-        }
+    nextStory() {
+      if (this.currentStoryIndex + 1 < this.story.length) {
+        this.currentStoryIndex++;
+        this.currentConversationIndex = 0; // Reset conversation index when switching stories
       }
     },
+    nextConversation() {
+      if (this.currentConversationIndex + 1 < this.currentStory.conversation.length) {
+        this.currentConversationIndex++;
+      } else {
+        this.nextStory();
+      }
+    },
+    gotoConversation(gotoIndex) {
+      this.currentConversationIndex = this.currentStory.conversation.findIndex(
+        (c) => c.conversationID === gotoIndex
+      );
+    },
+    parseText(text) {
+      return text.replace('{playerName}', this.playerName);
+    },
   },
-}
+};
 </script>
 
 <style scoped>
-.story-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.full-screen img {
+.comic-mode img,
+.conversation-mode .background {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
 }
-
-.conversation {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.character-image {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.dialogue {
+.character img {
   position: absolute;
   bottom: 10%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.8);
+}
+.dialogue {
+  position: absolute;
+  bottom: 5%;
+  left: 10%;
+  right: 10%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
   padding: 10px;
   border-radius: 5px;
+  text-align: center;
+}
+.options button {
+  margin: 5px;
+  padding: 10px;
 }
 </style>
