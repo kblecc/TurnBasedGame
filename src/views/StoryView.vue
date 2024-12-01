@@ -11,17 +11,23 @@
       <div class="character">
         <img :src="currentConversation.src.character" alt="Character Image" />
       </div>
-      <p class="dialogue">{{ parseText(currentConversation.said) }}</p>
-      <div v-if="currentConversation.option" class="options">
-        <button
-          v-for="(opt, index) in currentConversation.option"
-          :key="index"
-          @click="gotoConversation(opt.goto)"
-        >
-          {{ opt.option }}
-        </button>
+      <div v-if="!currentConversation.option" class="dialogue" @click="nextConversation">
+        <p>{{ parseText(currentConversation.said) }}</p>
       </div>
-      <button v-else @click="nextConversation">Next</button>
+      <div v-if="currentConversation.option" class="dialogue">
+        <p>{{ parseText(currentConversation.said) }}</p>
+        <div class="options">
+          <button
+            v-for="(opt, index) in currentConversation.option"
+            :key="index"
+            @click="gotoConversation(opt.goto)"
+          >
+            {{ opt.option }}
+          </button>
+        </div>
+      </div>
+
+
     </div>
   </div>
 </template>
@@ -105,40 +111,40 @@ export default {
       currentStoryIndex: 0,
       currentConversationIndex: 0,
       playerName: 'Player',
-    };
+    }
   },
   computed: {
     currentStory() {
-      return this.story[this.currentStoryIndex];
+      return this.story[this.currentStoryIndex]
     },
     currentConversation() {
-      return this.currentStory.conversation[this.currentConversationIndex];
+      return this.currentStory.conversation[this.currentConversationIndex]
     },
   },
   methods: {
     nextStory() {
       if (this.currentStoryIndex + 1 < this.story.length) {
-        this.currentStoryIndex++;
-        this.currentConversationIndex = 0; // Reset conversation index when switching stories
+        this.currentStoryIndex++
+        this.currentConversationIndex = 0 // Reset conversation index when switching stories
       }
     },
     nextConversation() {
       if (this.currentConversationIndex + 1 < this.currentStory.conversation.length) {
-        this.currentConversationIndex++;
+        this.currentConversationIndex++
       } else {
-        this.nextStory();
+        this.nextStory()
       }
     },
     gotoConversation(gotoIndex) {
       this.currentConversationIndex = this.currentStory.conversation.findIndex(
-        (c) => c.conversationID === gotoIndex
-      );
+        (c) => c.conversationID === gotoIndex,
+      )
     },
     parseText(text) {
-      return text.replace('{playerName}', this.playerName);
+      return text.replace('{playerName}', this.playerName)
     },
   },
-};
+}
 </script>
 
 <style scoped>

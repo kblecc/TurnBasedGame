@@ -1,27 +1,26 @@
-
-
 <template>
   <div class="fullscreenContainer">
     <div class="row">
       <div id="assertDisplay" class="row row-cols-4">
         <div class="col">
           <div class="card">
-          {{ this.gem }}</div>
+            {{ this.gem }}
+          </div>
         </div>
-        <div class="col"><div class="card">
-          {{ this.money }}
-        </div>
-
+        <div class="col">
+          <div class="card">
+            {{ this.money }}
+          </div>
         </div>
       </div>
-      </div>
+    </div>
     <div class="card" @click="this.$router.push('/map')">Adventure</div>
     <div id="BottomNav" class="row row-cols-4 align-items-end">
       <div class="col">
         <div class="card" @click="this.$router.push('/tavern')">Tavern</div>
       </div>
       <div class="col">
-        <div class="card" @click="this.$router.push('/map')">Store</div>
+        <div class="card" @click="this.$router.push('/store')">Store</div>
       </div>
       <div class="col">
         <div class="card" @click="this.$router.push('/map')">Mission</div>
@@ -34,15 +33,15 @@
 </template>
 
 <script>
-import Asserts from '@/components/Asserts';
+import Asserts from '@/components/Asserts'
 export default {
   data() {
     return {
       money: Asserts.showMoney(),
       gem: Asserts.showGem(),
-    };
-  }}
-
+    }
+  },
+}
 </script>
 
 <style scrope>

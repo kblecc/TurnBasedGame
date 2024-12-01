@@ -27,6 +27,26 @@
       </button>
     </div>
   </div>
+  <div v-if="showYourTurn()" class="overlay">
+    <div class="overlay-content">
+      <h1>Your Turn</h1>
+
+    </div>
+  </div>
+  <div v-if="showEnemyTurn()" class="overlay">
+    <div class="overlay-content">
+      <h1>Defeat</h1>
+      <button type="button" class="btn btn-secondary">Back to Map</button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
+      >
+        Try Again
+      </button>
+    </div>
+  </div>
   <div class="about">
     <div>
       <h1>Wave {{ current.wave + 1 }}</h1>
@@ -448,7 +468,12 @@ export default {
     checkWin() {
       let winWaves = this.levelDetails.waves.length || 11111111
       console.log(winWaves)
-      return this.current.wave + 1 > winWaves
+      if (this.current.wave + 1 > winWaves){
+
+        return true
+      }else{return false}
+
+
     },
     // Enemy Action
 

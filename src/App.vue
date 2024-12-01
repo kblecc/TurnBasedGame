@@ -13,6 +13,14 @@ import { RouterLink, RouterView } from 'vue-router'
     >
       menu
     </button> -->
+    <button
+      type="debug button "
+      class="btn btn-primary"
+     @click="this.$router.push('/storagedebug')"
+
+    >
+      menu
+    </button>
     <div
       class="modal fade"
       id="exampleModal"
@@ -32,7 +40,7 @@ import { RouterLink, RouterView } from 'vue-router'
             ></button>
           </div>
           <div class="modal-body">
-   
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -43,8 +51,39 @@ import { RouterLink, RouterView } from 'vue-router'
     </div>
 
   </div>
-
+<transition :name="transitionName" mode="out-in">
   <RouterView />
+  </transition>
 </template>
 
-<style scoped></style>
+<script>
+export default {
+  computed: {
+    transitionName() {
+      return this.$route.name === 'story' ? 'slide-left' : 'slide-right';
+    },
+  },
+};
+</script>
+
+<style scoped>
+.debug{
+  position: absolute; /* Position it fixed to the viewport */
+  top: 0; /* Align to the top */
+  left: 0; /* Align to the left */
+}
+/* Slide-left and slide-right transitions */
+.slide-left-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.5s;
+}
+.slide-left-enter, .slide-right-leave-to {
+  transform: translateX(100%);
+}
+.slide-right-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.5s;
+}
+.slide-right-enter, .slide-left-leave-to {
+  transform: translateX(-100%);
+}</style>
