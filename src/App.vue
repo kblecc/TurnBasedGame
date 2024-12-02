@@ -19,7 +19,7 @@ import { RouterLink, RouterView } from 'vue-router'
      @click="this.$router.push('/storagedebug')"
 
     >
-      menu
+      dev
     </button>
     <div
       class="modal fade"
@@ -51,9 +51,12 @@ import { RouterLink, RouterView } from 'vue-router'
     </div>
 
   </div>
-<transition :name="transitionName" mode="out-in">
-  <RouterView />
+
+  <router-view v-slot="{ Component }">
+  <transition>
+    <component :is="Component" />
   </transition>
+</router-view>
 </template>
 
 <script>

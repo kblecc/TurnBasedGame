@@ -1,5 +1,6 @@
 <template>
   <div class="storage-manager">
+    <button type="button" class="btn btn-primary" @click="this.$router.push('/home')">◀</button>
     <h1>Local Storage Manager</h1>
 
     <!-- Display all items in local storage -->

@@ -1,15 +1,12 @@
 <template>
   <div class="container mt-4">
+    <button type="button" class="btn btn-primary" @click="this.$router.push('/home')">◀</button>
     <div id="assertDisplay" class="row row-cols-4">
       <div class="col">
-        <div class="card">
-          {{ this.gem }}
-        </div>
+        <div class="card">💎 Gems: {{ gem }}</div>
       </div>
       <div class="col">
-        <div class="card">
-          {{ this.money }}
-        </div>
+        <div class="card">💰 Money: {{ money }}</div>
       </div>
     </div>
     <h1 class="text-center">Store</h1>
@@ -53,7 +50,7 @@
         aria-labelledby="in-game-tab"
       >
         <div class="row mt-3">
-          <div v-for="item in inGameItems" :key="item.id" class="col-md-4 mb-4">
+          <div v-for="item in inGameItems" :key="item.id" class="col-4 mb-4">
             <div class="card h-100">
               <img v-if="item.img" :src="item.img" class="card-img-top" alt="Item image" />
               <div class="card-body">
@@ -140,12 +137,29 @@ export default {
           description: 'Large gem pack.',
           img: 'gem99.png',
         },
+        {
+          id: 'coin5',
+          name: 'Coin Pack',
+          qty: 5,
+          description: 'Small coin pack.',
+          img: 'gem5.png',
+        },
+        {
+          id: 'gem99',
+          name: 'Coin Pack',
+          qty: 99,
+          description: 'Large coin pack.',
+          img: 'gem99.png',
+        },
       ],
-      money: Asserts.showMoney(),
-      gem: Asserts.showGem(),
+      money: 0,
+      gem: 0,
     }
   },
-  computed: {},
+  mounted() {
+    this.money = Asserts.getMoney()
+    this.gem = Asserts.getGem()
+  },
   methods: {
     purchaseItem(item) {
       const { price, id, qty } = item
@@ -153,8 +167,11 @@ export default {
       const amount = price.money || price.gem
 
       // Check balance and process purchase
-      const balance = key === 'money' ? Asserts.getMoney() : Asserts.getGem()
+      const balance = key === 'money' ? this.money : this.gem
       if (balance >= amount && item.limit > 0) {
+        if (key === 'money') this.money -= amount
+        else this.gem -= amount
+
         Asserts.setValue(key, balance - amount)
         item.limit -= 1 // Decrease purchase limit
         alert(`Purchased ${qty} x ${item.name}`)
@@ -164,9 +181,13 @@ export default {
     },
     addCurrency(option) {
       const { name, qty } = option
-      const key = name.toLowerCase()
-      Asserts.setValue(key, Asserts[key === 'gem' ? 'getGem' : 'getMoney']() + qty)
-      alert(`${qty} ${name} added to your account.`)
+      const key = name.toLowerCase().includes('gem') ? 'gem' : 'money'
+
+      if (key === 'money') this.money += qty
+      else this.gem += qty
+
+      Asserts.setValue(key, Asserts.getValue(key) + qty)
+      alert(`${qty} ${key} added to your account.`)
     },
   },
 }

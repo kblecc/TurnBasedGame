@@ -1,235 +1,267 @@
 <template>
-  <div v-if="checkDefeat()" class="overlay">
-    <div class="overlay-content">
-      <h1>Defeat</h1>
-      <button type="button" class="btn btn-secondary">Back to Map</button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Try Again
-      </button>
+  <div v-if="!isLoading">
+    <div v-if="checkDefeat()" class="overlay" style="z-index: 1200">
+      <div class="overlay-content">
+        <h1>Defeat</h1>
+        <button type="button" class="btn btn-secondary">Back to Map</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          Try Again
+        </button>
+      </div>
     </div>
-  </div>
-  <div v-if="checkWin() && !checkDefeat()" class="overlay">
-    <div class="overlay-content">
-      <h1>win</h1>
-      <button type="button" class="btn btn-secondary">Back to Map</button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Try Again
-      </button>
+    <div v-if="checkWin() && !checkDefeat()" class="overlay" style="z-index: 1200">
+      <div class="overlay-content">
+        <h1>win</h1>
+        <button type="button" class="btn btn-secondary">Back to Map</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          Try Again
+        </button>
+      </div>
     </div>
-  </div>
-  <div v-if="showYourTurn()" class="overlay">
-    <div class="overlay-content">
-      <h1>Your Turn</h1>
-
+    <div v-if="showYourTurn" class="overlay">
+      <div class="overlay-content">
+        <h1>Your Turn</h1>
+      </div>
     </div>
-  </div>
-  <div v-if="showEnemyTurn()" class="overlay">
-    <div class="overlay-content">
-      <h1>Defeat</h1>
-      <button type="button" class="btn btn-secondary">Back to Map</button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Try Again
-      </button>
+    <div v-if="showEnemyTurn" class="overlay">
+      <div class="overlay-content">
+        <h1>Enemy's turn</h1>
+      </div>
     </div>
-  </div>
-  <div class="about">
-    <div>
-      <h1>Wave {{ current.wave + 1 }}</h1>
-      <h2>Turn {{ current.turn }}</h2>
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#battleModal"
-        id="menuButton"
-      >
-        menu
-      </button>
-      <div
-        class="modal fade"
-        id="battleModal"
-        tabindex="-1"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Battle Paused</h1>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <RouterLink to="/">Home</RouterLink>
-              <RouterLink to="/character">Character</RouterLink>
-              <RouterLink to="/item">Items</RouterLink>
-              <RouterLink to="/about">About</RouterLink>
-              <RouterLink to="/battle">Battle</RouterLink>
+    <div class="about">
+      <div>
+        <h1>Wave {{ current.wave + 1 }}</h1>
+        <h2>Turn {{ current.turn }}</h2>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#battleModal"
+          id="menuButton"
+        >
+          menu
+        </button>
+        <div
+          class="modal fade"
+          id="battleModal"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Battle Paused</h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <RouterLink to="/">Home</RouterLink>
+                <RouterLink to="/character">Character</RouterLink>
+                <RouterLink to="/item">Items</RouterLink>
+                <RouterLink to="/about">About</RouterLink>
+                <RouterLink to="/battle">Battle</RouterLink>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div v-for="(wave, waveIndex) in levelDetails.waves">
-        <div v-if="current.wave == waveIndex">
-          <div class="row row-cols-5">
-            <!-- Enemy Area -->
+        <div v-for="(wave, waveIndex) in levelDetails.waves">
+          <div v-if="current.wave == waveIndex">
+            <div class="row row-cols-5">
+              <!-- Enemy Area -->
+              <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
+                <!-- HP -->
+                <div class="progress">
+                  <div class="progress-bar" :style="getEnemyHpPercent(waveIndex, enemyIndex)">
+                    {{ current.enemyStatus[waveIndex].enemy[enemyIndex].properties.hp }}/{{
+                      levelDetails.waves[waveIndex].enemy[enemyIndex].properties.hp
+                    }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enemy Art -->
+            <div class="row row-cols-5">
+              <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
+                <div
+                  class="card"
+                  @touchstart="touchStartEnemyHandling(enemyIndex)"
+                  @touchend="touchEndEnemyHandling()"
+                  @click="setTargetEnemy(enemyIndex)"
+                >
+                  <div class="card-body">
+                    <h5 class="card-title">{{ enemy.name }}</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enemy Details -->
             <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
-              <!-- HP -->
+              <div v-if="current.activeEnemyDetails == enemyIndex">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ enemy.name }}</h5>
+                    <p class="card-text">{{ enemy.properties }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Character Control -->
+        <div id="characterControl" class="row row-cols-5 align-items-end">
+          <div class="col" v-for="(character, characterIndex) in current.playerStatus">
+            <div v-if="current.turnPlayerStatus[characterIndex].action == ''">
+              <div
+                class="card characterCard"
+                @touchstart="touchStartCharacterHandling(characterIndex)"
+                @touchend="touchEndCharacterHandling()"
+                v-touch="{
+                  left: () => swipe('Left'),
+                  right: () => swipe('Right'),
+                  up: () => characterAttack(characterIndex),
+                  down: () => characterDefend(characterIndex),
+                }"
+                :disable="current.turnPlayerStatus[characterIndex].action"
+                :style="{
+                  background: `linear-gradient(
+            rgba(255, 255, 255, 0),
+            ${
+              current.playerStatus[characterIndex].properties.hp === 0
+                ? 'rgba(255, 0, 0, 0.6)' // Red overlay for dead
+                : 'rgba(0, 0, 0, 0)'
+            }
+          ), url(${playerDetails.character[characterIndex].src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }"
+              >
+                <div class="card-body" :id="'character' + characterIndex">
+                  <p class="card-title">{{ character.name }}</p>
+                </div>
+              </div>
               <div class="progress">
-                <div class="progress-bar" :style="getEnemyHpPercent(waveIndex, enemyIndex)">
-                  {{ current.enemyStatus[waveIndex].enemy[enemyIndex].properties.hp }}/{{
-                    levelDetails.waves[waveIndex].enemy[enemyIndex].properties.hp
+                <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
+                  {{ current.playerStatus[characterIndex].properties.hp }}/{{
+                    playerDetails.character[characterIndex].properties.hp
+                  }}
+                </div>
+              </div>
+            </div>
+            <div v-else-if="current.turnPlayerStatus[characterIndex].action == 'defend'">
+              <div
+                class="card characterCard"
+                @touchstart="touchStartCharacterHandling(characterIndex)"
+                @touchend="touchEndCharacterHandling()"
+                :style="{
+                  background: `linear-gradient(
+            rgba(0, 0, 255, 0.6),
+            rgba(0, 0, 0, 0)
+          ), url(${playerDetails.character[characterIndex].src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }"
+              >
+                <div class="card-body" :id="'character' + characterIndex">
+                  <p class="card-title">{{ character.name }}</p>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
+                  {{ current.playerStatus[characterIndex].properties.hp }}/{{
+                    playerDetails.character[characterIndex].properties.hp
+                  }}
+                </div>
+              </div>
+            </div>
+            <div v-else-if="current.playerStatus[characterIndex].properties.hp === 0">
+              <div
+                class="card characterCard"
+                @touchstart="touchStartCharacterHandling(characterIndex)"
+                @touchend="touchEndCharacterHandling()"
+                :style="{
+                  background: `linear-gradient(
+            rgba(255, 0, 0, 0.6),
+            rgba(0, 0, 0, 0)
+          ), url(${playerDetails.character[characterIndex].src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }"
+              >
+                <div class="card-body" :id="'character' + characterIndex">
+                  <p class="card-title">{{ character.name }}</p>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
+                  {{ current.playerStatus[characterIndex].properties.hp }}/{{
+                    playerDetails.character[characterIndex].properties.hp
+                  }}
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              <div
+                class="card characterCard"
+                @touchstart="touchStartCharacterHandling(characterIndex)"
+                @touchend="touchEndCharacterHandling()"
+                :style="{
+                  background: `linear-gradient(
+            rgba(128, 128, 128, 0.6),
+            rgba(0, 0, 0, 0)
+          ), url(${playerDetails.character[characterIndex].src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }"
+              >
+                <div class="card-body" :id="'character' + characterIndex">
+                  <p class="card-title">{{ character.name }}</p>
+                </div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
+                  {{ current.playerStatus[characterIndex].properties.hp }}/{{
+                    playerDetails.character[characterIndex].properties.hp
                   }}
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- Enemy Art -->
-          <div class="row row-cols-5">
-            <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
-              <div
-                class="card"
-                @touchstart="touchStartEnemyHandling(enemyIndex)"
-                @touchend="touchEndEnemyHandling()"
-                @click="setTargetEnemy(enemyIndex)"
-              >
-                <div class="card-body">
-                  <h5 class="card-title">{{ enemy.name }}</h5>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Enemy Details -->
-          <div class="col" v-for="(enemy, enemyIndex) in levelDetails.waves[waveIndex].enemy">
-            <div v-if="current.activeEnemyDetails == enemyIndex">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">{{ enemy.name }}</h5>
-                  <p class="card-text">{{ enemy.properties }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Character Control -->
-      <div id="characterControl" class="row row-cols-5 align-items-end">
+        <!-- Character Details -->
         <div class="col" v-for="(character, characterIndex) in current.playerStatus">
-          <div v-if="current.turnPlayerStatus[characterIndex].action == ''">
-            <div
-              class="card characterCard"
-              @touchstart="touchStartCharacterHandling(characterIndex)"
-              @touchend="touchEndCharacterHandling()"
-              v-touch="{
-                left: () => swipe('Left'),
-                right: () => swipe('Right'),
-                up: () => characterAttack(characterIndex),
-                down: () => characterDefend(characterIndex),
-              }"
-              :disable="current.turnPlayerStatus[characterIndex].action"
-            >
+          <div v-if="current.activeCharacterDetails == characterIndex">
+            <div class="card">
               <div class="card-body" :id="'character' + characterIndex">
-                <p class="card-title">{{ character.name }}</p>
-              </div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
-                {{ current.playerStatus[characterIndex].properties.hp }}/{{
-                  playerDetails.character[characterIndex].properties.hp
-                }}
-              </div>
-            </div>
-          </div>
-          <div v-else-if="current.turnPlayerStatus[characterIndex].action == 'defend'">
-            <div
-              class="card characterCard"
-              @touchstart="touchStartCharacterHandling(characterIndex)"
-              @touchend="touchEndCharacterHandling()"
-            >
-              <div class="card-body text-bg-warning" :id="'character' + characterIndex">
-                <p class="card-title">{{ character.name }}</p>
-              </div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
-                {{ current.playerStatus[characterIndex].properties.hp }}/{{
-                  playerDetails.character[characterIndex].properties.hp
-                }}
-              </div>
-            </div>
-          </div>
-          <div v-else-if="current.playerStatus[characterIndex].properties.hp === 0">
-            <div
-              class="card characterCard"
-              @touchstart="touchStartCharacterHandling(characterIndex)"
-              @touchend="touchEndCharacterHandling()"
-            >
-              <div class="card-body text-bg-warning" :id="'character' + characterIndex">
-                <p class="card-title">{{ character.name }}</p>
-              </div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
-                {{ current.playerStatus[characterIndex].properties.hp }}/{{
-                  playerDetails.character[characterIndex].properties.hp
-                }}
-              </div>
-            </div>
-          </div>
-          <div v-else>
-            <div
-              class="card characterCard"
-              @touchstart="touchStartCharacterHandling(characterIndex)"
-              @touchend="touchEndCharacterHandling()"
-            >
-              <div class="card-body text-bg-secondary" :id="'character' + characterIndex">
-                <p class="card-title">{{ character.name }}</p>
-              </div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" :style="getCharacterHpPercent(characterIndex)">
-                {{ current.playerStatus[characterIndex].properties.hp }}/{{
-                  playerDetails.character[characterIndex].properties.hp
-                }}
+                <h5 class="card-title">{{ character.name }}</h5>
+                <p class="card-text">{{ character.properties }}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Character Details -->
-      <div class="col" v-for="(character, characterIndex) in current.playerStatus">
-        <div v-if="current.activeCharacterDetails == characterIndex">
-          <div class="card">
-            <div class="card-body" :id="'character' + characterIndex">
-              <h5 class="card-title">{{ character.name }}</h5>
-              <p class="card-text">{{ character.properties }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
+  </div>
+  <div v-else class="overlay">
+    <div class="overlay-content">
+      <h1>Loading</h1>
     </div>
   </div>
 </template>
@@ -336,6 +368,7 @@ export default {
           {
             order: 1,
             name: 'water',
+            src: 'https://github.com/kblecc/StaticAsserts/blob/TurnBasedGame/waterslime.PNG?raw=true',
             properties: {
               attribute: 'water',
               hp: 500,
@@ -349,6 +382,7 @@ export default {
           {
             order: 2,
             name: 'fire',
+            src: 'https://github.com/kblecc/StaticAsserts/blob/TurnBasedGame/fireslime.PNG?raw=true',
             properties: {
               attribute: 'fire',
               hp: 300,
@@ -362,6 +396,7 @@ export default {
           {
             order: 3,
             name: 'light',
+            src: 'https://github.com/kblecc/StaticAsserts/blob/TurnBasedGame/lightslime.PNG?raw=true',
             properties: {
               attribute: 'light',
               hp: 500,
@@ -375,6 +410,7 @@ export default {
           {
             order: 4,
             name: 'dark',
+            src: 'https://github.com/kblecc/StaticAsserts/blob/TurnBasedGame/darkslime.PNG?raw=true',
             properties: {
               attribute: 'dark',
               hp: 600,
@@ -388,6 +424,7 @@ export default {
           {
             order: 5,
             name: 'wood',
+            src: 'https://github.com/kblecc/StaticAsserts/blob/TurnBasedGame/woodslime.PNG?raw=true',
             properties: {
               attribute: 'wood',
               hp: 300,
@@ -401,6 +438,9 @@ export default {
         ],
       },
       levelDetails: {},
+      isLoading: true,
+      showEnemyTurn: false,
+      showYourTurn: false,
     }
   },
 
@@ -418,6 +458,7 @@ export default {
           this.levelDetails = JSON.parse(JSON.stringify(response.data))
           console.log(this.levelDetails)
           this.current.enemyStatus = JSON.parse(JSON.stringify(this.levelDetails.waves))
+          this.isLoading = false
         })
     },
     delay(ms) {
@@ -468,15 +509,162 @@ export default {
     checkWin() {
       let winWaves = this.levelDetails.waves.length || 11111111
       console.log(winWaves)
-      if (this.current.wave + 1 > winWaves){
-
+      if (this.current.wave + 1 > winWaves) {
         return true
-      }else{return false}
-
-
+      } else {
+        return false
+      }
     },
-    // Enemy Action
+    // // Enemy Action
 
+    // async enemyRespond() {
+    //   for (let i = 0; i < this.levelDetails.waves[this.current.wave].enemy.length; i++) {
+    //     if (this.current.enemyStatus[this.current.wave].enemy[i].properties.hp > 0) {
+    //       this.enemyAttackPriority(this.current.enemyStatus[this.current.wave].enemy[i])
+    //     }
+
+    //     await this.delay(1000) // Wait for 2 seconds before the next iteration
+    //   }
+
+    //   if (this.checkWaveComplete()) {
+    //     this.showYourTurn = true
+    //     await this.delay(2000)
+    //     this.showYourTurn = false
+    //     this.newWave()
+    //     this.newTurn()
+    //   } else {
+    //     this.showYourTurn = true
+    //     await this.delay(2000)
+    //     this.showYourTurn = false
+    //     this.newTurn()
+    //   }
+    // },
+    // enemyAttackPriority(enemy) {
+    //   switch (enemy.properties.attackMode) {
+    //     case 'single': {
+    //       let actionMade = false
+    //       // First Proprity
+    //       if (actionMade === false) {
+    //         actionMade = this.enemyFirstPriorityAttack(enemy)
+    //       }
+
+    //       // Second priority: No defend character
+    //       if (actionMade === false) {
+    //         actionMade = this.enemySecondPriorityAttack(enemy)
+    //       }
+    //       //Final priority: Random attack, I want to make defend, TODO
+    //       if (actionMade === false) {
+    //         let character = Math.floor(Math.random() * 5)
+    //         this.current.playerStatus[character].properties.hp =
+    //           this.current.playerStatus[character].properties.hp - enemy.properties.attack
+    //       }
+    //       break
+    //     }
+    //     case 'multi':
+    //       enemy.properties.hp =
+    //         enemy.properties.hp -
+    //         enemy.properties.attack / this.current.enemyStatus[this.current.wave].enemy.length
+    //       break
+    //     default:
+    //   }
+    // },
+    // enemyFirstPriorityAttack(enemy) {
+    //   let bonus = 30
+    //   switch (enemy.properties.attribute) {
+    //     case 'fire':
+    //       for (let i = 0; i < 5; i++) {
+    //         if (
+    //           this.playerDetails.character[i].properties.attribute === 'wood' &&
+    //           this.current.turnPlayerStatus[i].action !== 'defend' &&
+    //           this.current.playerStatus[i].properties.hp !== 0
+    //         ) {
+    //           this.current.playerStatus[i].properties.hp =
+    //             this.current.playerStatus[i].properties.hp -
+    //             enemy.properties.attack * (1 + bonus / 100)
+    //           return true
+    //         }
+    //       }
+
+    //       break
+    //     case 'water':
+    //       for (let i = 0; i < 5; i++) {
+    //         if (
+    //           this.playerDetails.character[i].properties.attribute === 'fire' &&
+    //           this.current.turnPlayerStatus[i].action !== 'defend' &&
+    //           this.current.playerStatus[i].properties.hp !== 0
+    //         ) {
+    //           this.current.playerStatus[i].properties.hp =
+    //             this.current.playerStatus[i].properties.hp -
+    //             enemy.properties.attack * (1 + bonus / 100)
+
+    //           return true
+    //         }
+    //       }
+    //       break
+    //     case 'wood':
+    //       for (let i = 0; i < 5; i++) {
+    //         if (
+    //           this.playerDetails.character[i].properties.attribute === 'water' &&
+    //           this.current.turnPlayerStatus[i].action !== 'defend' &&
+    //           this.current.playerStatus[i].properties.hp !== 0
+    //         ) {
+    //           this.current.playerStatus[i].properties.hp =
+    //             this.current.playerStatus[i].properties.hp -
+    //             enemy.properties.attack * (1 + bonus / 100)
+    //           return true
+    //         }
+    //       }
+    //       break
+    //     case 'light':
+    //       for (let i = 0; i < 5; i++) {
+    //         if (
+    //           this.playerDetails.character[i].properties.attribute === 'dark' &&
+    //           this.current.turnPlayerStatus[i].action !== 'defend' &&
+    //           this.current.playerStatus[i].properties.hp !== 0
+    //         ) {
+    //           this.current.playerStatus[i].properties.hp =
+    //             this.current.playerStatus[i].properties.hp -
+    //             enemy.properties.attack * (1 + bonus / 100)
+    //           return true
+    //         }
+    //       }
+    //       break
+    //     case 'dark':
+    //       for (let i = 0; i < 5; i++) {
+    //         if (
+    //           this.playerDetails.character[i].properties.attribute === 'light' &&
+    //           this.current.turnPlayerStatus[i].action !== 'defend' &&
+    //           this.current.playerStatus[i].properties.hp !== 0
+    //         ) {
+    //           this.current.playerStatus[i].properties.hp =
+    //             this.current.playerStatus[i].properties.hp -
+    //             enemy.properties.attack * (1 + bonus / 100)
+    //           return true
+    //         }
+    //       }
+    //       break
+    //     default:
+    //   }
+    //   return false
+    // },
+    // enemySecondPriorityAttack(enemy) {
+    //   for (let i = 0; i < 5; i++) {
+    //     if (
+    //       this.current.turnPlayerStatus[i].action !== 'defend' &&
+    //       this.current.playerStatus[i].properties.hp !== 0
+    //     ) {
+    //       if (this.current.playerStatus[i].properties.defend - enemy.properties.attack > 0) {
+    //         this.current.playerStatus[i].properties.hp =
+    //           this.current.playerStatus[i].properties.hp - enemy.properties.attack
+    //       } else {
+    //         this.current.playerStatus[i].properties.hp = 0
+    //       }
+    //       return true
+    //     }
+    //   }
+    //   return false
+    // },
+    // Enemy Action
     async enemyRespond() {
       for (let i = 0; i < this.levelDetails.waves[this.current.wave].enemy.length; i++) {
         if (this.current.enemyStatus[this.current.wave].enemy[i].properties.hp > 0) {
@@ -487,137 +675,117 @@ export default {
       }
 
       if (this.checkWaveComplete()) {
+        this.showYourTurn = true
+        await this.delay(2000)
+        this.showYourTurn = false
         this.newWave()
         this.newTurn()
       } else {
+        this.showYourTurn = true
+        await this.delay(2000)
+        this.showYourTurn = false
         this.newTurn()
       }
     },
+
     enemyAttackPriority(enemy) {
       switch (enemy.properties.attackMode) {
         case 'single': {
           let actionMade = false
-          // First Proprity
-          if (actionMade === false) {
+
+          // First Priority Attack
+          if (!actionMade) {
             actionMade = this.enemyFirstPriorityAttack(enemy)
           }
 
-          // Second priority: No defend character
-          if (actionMade === false) {
+          // Second Priority Attack
+          if (!actionMade) {
             actionMade = this.enemySecondPriorityAttack(enemy)
           }
-          //Final priority: Random attack, I want to make defend, TODO
-          if (actionMade === false) {
-            let character = Math.floor(Math.random() * 5)
-            this.current.playerStatus[character].properties.hp =
-              this.current.playerStatus[character].properties.hp - enemy.properties.attack
+
+          // Final Priority: Random Attack
+          if (!actionMade) {
+            let aliveCharacters = this.current.playerStatus
+              .map((character, index) => (character.properties.hp > 0 ? index : null))
+              .filter((index) => index !== null)
+
+            if (aliveCharacters.length > 0) {
+              let targetIndex = aliveCharacters[Math.floor(Math.random() * aliveCharacters.length)]
+              this.current.playerStatus[targetIndex].properties.hp = Math.max(
+                this.current.playerStatus[targetIndex].properties.hp - enemy.properties.attack,
+                0,
+              )
+            }
           }
           break
         }
-        case 'multi':
-          enemy.properties.hp =
-            enemy.properties.hp -
-            enemy.properties.attack / this.current.enemyStatus[this.current.wave].enemy.length
+
+        case 'multi': {
+          let aliveCharacters = this.current.playerStatus.filter(
+            (character) => character.properties.hp > 0,
+          )
+
+          if (aliveCharacters.length > 0) {
+            let damage = enemy.properties.attack / aliveCharacters.length
+            aliveCharacters.forEach((character) => {
+              character.properties.hp = Math.max(character.properties.hp - damage, 0)
+            })
+          }
           break
+        }
+
         default:
+          break
       }
     },
+
     enemyFirstPriorityAttack(enemy) {
-      let bonus = 30
-      switch (enemy.properties.attribute) {
-        case 'fire':
-          for (let i = 0; i < 5; i++) {
-            if (
-              this.playerDetails.character[i].properties.attribute === 'wood' &&
-              this.current.turnPlayerStatus[i].action !== 'defend' &&
-              this.current.playerStatus[i].properties.hp !== 0
-            ) {
-              this.current.playerStatus[i].properties.hp =
-                this.current.playerStatus[i].properties.hp -
-                enemy.properties.attack * (1 + bonus / 100)
-              return true
-            }
-          }
+      const bonus = 30
+      const attributeAdvantage = {
+        fire: 'wood',
+        water: 'fire',
+        wood: 'water',
+        light: 'dark',
+        dark: 'light',
+      }
 
-          break
-        case 'water':
-          for (let i = 0; i < 5; i++) {
-            if (
-              this.playerDetails.character[i].properties.attribute === 'fire' &&
-              this.current.turnPlayerStatus[i].action !== 'defend' &&
-              this.current.playerStatus[i].properties.hp !== 0
-            ) {
-              this.current.playerStatus[i].properties.hp =
-                this.current.playerStatus[i].properties.hp -
-                enemy.properties.attack * (1 + bonus / 100)
+      const targetAttribute = attributeAdvantage[enemy.properties.attribute]
 
-              return true
-            }
+      if (targetAttribute) {
+        for (let i = 0; i < 5; i++) {
+          if (
+            this.playerDetails.character[i].properties.attribute === targetAttribute &&
+            this.current.turnPlayerStatus[i].action !== 'defend' &&
+            this.current.playerStatus[i].properties.hp > 0
+          ) {
+            this.current.playerStatus[i].properties.hp = Math.max(
+              this.current.playerStatus[i].properties.hp -
+                enemy.properties.attack * (1 + bonus / 100),
+              0,
+            )
+            return true
           }
-          break
-        case 'wood':
-          for (let i = 0; i < 5; i++) {
-            if (
-              this.playerDetails.character[i].properties.attribute === 'water' &&
-              this.current.turnPlayerStatus[i].action !== 'defend' &&
-              this.current.playerStatus[i].properties.hp !== 0
-            ) {
-              this.current.playerStatus[i].properties.hp =
-                this.current.playerStatus[i].properties.hp -
-                enemy.properties.attack * (1 + bonus / 100)
-              return true
-            }
-          }
-          break
-        case 'light':
-          for (let i = 0; i < 5; i++) {
-            if (
-              this.playerDetails.character[i].properties.attribute === 'dark' &&
-              this.current.turnPlayerStatus[i].action !== 'defend' &&
-              this.current.playerStatus[i].properties.hp !== 0
-            ) {
-              this.current.playerStatus[i].properties.hp =
-                this.current.playerStatus[i].properties.hp -
-                enemy.properties.attack * (1 + bonus / 100)
-              return true
-            }
-          }
-          break
-        case 'dark':
-          for (let i = 0; i < 5; i++) {
-            if (
-              this.playerDetails.character[i].properties.attribute === 'light' &&
-              this.current.turnPlayerStatus[i].action !== 'defend' &&
-              this.current.playerStatus[i].properties.hp !== 0
-            ) {
-              this.current.playerStatus[i].properties.hp =
-                this.current.playerStatus[i].properties.hp -
-                enemy.properties.attack * (1 + bonus / 100)
-              return true
-            }
-          }
-          break
-        default:
+        }
       }
       return false
     },
+
     enemySecondPriorityAttack(enemy) {
       for (let i = 0; i < 5; i++) {
         if (
           this.current.turnPlayerStatus[i].action !== 'defend' &&
-          this.current.playerStatus[i].properties.hp !== 0
+          this.current.playerStatus[i].properties.hp > 0
         ) {
-          if (this.current.playerStatus[i].properties.defend - enemy.properties.attack > 0) {
-            this.current.playerStatus[i].properties.hp =
-              this.current.playerStatus[i].properties.hp - enemy.properties.attack
-          } else {
-            this.current.playerStatus[i].properties.hp = 0
-          }
+          this.current.playerStatus[i].properties.hp = Math.max(
+            this.current.playerStatus[i].properties.hp - enemy.properties.attack,
+            0,
+          )
           return true
         }
       }
       return false
     },
+
     // Player Action
     touchStartCharacterHandling(index) {
       this.pressTimer = setTimeout(() => {
@@ -637,7 +805,7 @@ export default {
       clearTimeout(this.pressTimer)
       this.current.activeEnemyDetails = -1
     },
-    characterAttack(index) {
+    async characterAttack(index) {
       let atk = this.playerDetails.character[index].properties.attack
       let bonus = 50
 
@@ -816,13 +984,19 @@ export default {
         this.newTurn()
       } else {
         if (this.checkTurnComplete()) {
+          this.showEnemyTurn = true
+          await this.delay(2000)
+          this.showEnemyTurn = false
           this.enemyRespond()
         }
       }
     },
-    characterDefend(index) {
+    async characterDefend(index) {
       this.current.turnPlayerStatus[index].action = 'defend'
       if (this.checkTurnComplete()) {
+        this.showEnemyTurn = true
+        await this.delay(2000)
+        this.showEnemyTurn = false
         this.enemyRespond()
       }
     },
@@ -858,9 +1032,12 @@ export default {
       )
     },
   },
-  created() {
+  async created() {
     this.getLevelDetails()
     this.current.playerStatus = JSON.parse(JSON.stringify(this.playerDetails.character))
+    this.showYourTurn = true
+    await this.delay(2000)
+    this.showYourTurn = false
   },
 }
 </script>

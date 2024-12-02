@@ -1,18 +1,21 @@
-
-
 const getMoney = () => {
-    const value = localStorage.getItem("money");
-    return value ? parseInt(value, 10) : 0; // Return 0 if not found
-};
-
-const getGem = () => {
   const value = localStorage.getItem('money')
   return value ? parseInt(value, 10) : 0 // Return 0 if not found
 }
 
+const getGem = () => {
+  const value = localStorage.getItem('gem')
+  return value ? parseInt(value, 10) : 0 // Return 0 if not found
+}
+
 const setValue = (key, value) => {
-    localStorage.setItem(key, value);
-};
+  localStorage.setItem(key, value)
+}
+
+const getValue = (key) => {
+  const value = localStorage.getItem(key)
+  return value ? parseInt(value, 10) : 0
+}
 
 const addMoney = (key, amount) => {
   const currentValue = getMoney()
@@ -30,25 +33,26 @@ const decreaseMoney = (amount) => {
 }
 
 const decreaseGem = (key, amount) => {
-  const currentValue = addGem
-  setValue("gem", Math.max(currentValue - amount, 0)) // Prevent negative values
+  const currentValue = getGem()
+  setValue('gem', Math.max(currentValue - amount, 0)) // Prevent negative values
 }
 
 const showMoney = () => {
-    return getMoney()
-};
+  return getMoney()
+}
 const showGem = () => {
-    return getGem()
-};
+  return getGem()
+}
 
 export default {
-    getGem,
-    getMoney,
-    setValue,
-   addGem,
-   addMoney,
-   decreaseGem,
-   decreaseMoney,
-   showGem,
-   showMoney
-};
+  getGem,
+  getMoney,
+  setValue,
+  addGem,
+  addMoney,
+  decreaseGem,
+  decreaseMoney,
+  showGem,
+  showMoney,
+  getValue,
+}

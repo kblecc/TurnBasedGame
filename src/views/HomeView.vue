@@ -26,7 +26,7 @@
         <div class="card" @click="this.$router.push('/map')">Mission</div>
       </div>
       <div class="col">
-        <div class="card" @click="this.$router.push('/map')">Team</div>
+        <div class="card" @click="this.$router.push('/team')">Team</div>
       </div>
     </div>
   </div>

@@ -65,12 +65,20 @@ const router = createRouter({
     },
 
     {
-      path: '/travern',
-      name: 'travern',
+      path: '/tavern',
+      name: 'tavern',
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/TavernView.vue'),
+    },
+    {
+      path: '/team',
+      name: 'team',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('../views/CharacterView.vue'),
     },
     {
       path: '/storagedebug',

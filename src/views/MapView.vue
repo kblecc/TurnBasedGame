@@ -1,5 +1,5 @@
-<template>
-  <button type="button" class="btn btn-primary" @click="this.$router.push('/home')">◀</button>
+<template><button type="button" class="btn btn-primary" @click="this.$router.push('/home')">◀</button>
+
   <div class="map" ref="map">
     <div v-for="(area, areaIndex) in reversedMap">
       <div class="card" @click="this.setActiveArea(area.id)">
