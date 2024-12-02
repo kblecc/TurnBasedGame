@@ -4,7 +4,7 @@
     <!-- Gacha Info -->
     <div class="row">
       <div class="col">
-        <h3>Gacha Draw</h3>
+        <h3>Welcome, to the Tavern, meet some new friends</h3>
         <div class="card">💎 Gems: {{ gems }}</div>
         <p>Yocan can invite one new friend to you team for 20 Gems, or 10 for 180 Gems</p>
       </div>

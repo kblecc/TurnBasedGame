@@ -26,8 +26,6 @@
           </button>
         </div>
       </div>
-
-
     </div>
   </div>
 </template>
@@ -40,17 +38,17 @@ export default {
         {
           id: 0,
           type: 'fullScreen',
-          src: 'https://placehold.co/600x400?text=1',
+          src: 'https://placehold.co/600x400?text=Welcome+to+the+Team!',
         },
         {
           id: 1,
           type: 'fullScreen',
-          src: 'https://placehold.co/600x400?text=2',
+          src: 'https://placehold.co/600x400?text=Great+to+Meet+You!',
         },
         {
           id: 2,
           type: 'fullScreen',
-          src: 'https://placehold.co/600x400?text=3',
+          src: 'https://placehold.co/600x400?text=New+Adventures+Together!',
         },
         {
           id: 3,
@@ -58,56 +56,57 @@ export default {
           conversation: [
             {
               conversationID: 0,
-              character: 'Name',
-              said: 'Hello',
+              character: 'NewFriend1',
+              said: 'Hi! I am your new friend!',
               src: {
-                background: 'https://placehold.co/600x400?text=5',
-                character: 'https://placehold.co/600x400?text=4',
+                background: 'https://placehold.co/600x400?text=Friendly+Welcome',
+                character: 'https://placehold.co/600x400?text=Character+Image+1',
               },
             },
             {
               conversationID: 1,
-              character: 'Name1',
-              said: 'Hello,{playerName}',
+              character: 'Player',
+              said: 'Hello! What is your name?',
               src: {
-                background: 'https://placehold.co/600x400?text=6',
-                character: 'https://placehold.co/600x400?text=7',
+                background: 'https://placehold.co/600x400?text=Player+Background',
+                character: 'https://placehold.co/600x400?text=Player+Image',
               },
             },
             {
               conversationID: 2,
-              character: 'Name',
-              said: 'Hey',
+              character: 'NewFriend1',
+              said: 'My name is Slimy! It’s great to be part of your team!',
               option: [
-                { option: 'Option 1', goto: 3 },
-                { option: 'Option 2', goto: 4 },
+                { option: 'Welcome to the team, Slimy!', goto: 3 },
+                { option: 'What can you do to help me?', goto: 4 },
               ],
               src: {
-                background: 'https://placehold.co/600x400?text=8',
-                character: 'https://placehold.co/600x400?text=9',
+                background: 'https://placehold.co/600x400?text=New+Character+Image+2',
+                character: 'https://placehold.co/600x400?text=Character+Image+2',
               },
             },
             {
               conversationID: 3,
-              character: 'Nameoption1',
-              said: 'Hello',
+              character: 'NewFriend1',
+              said: 'Thank you! I will always be here to support you.',
               src: {
-                background: 'https://placehold.co/600x400?text=10',
-                character: 'https://placehold.co/600x400?text=11',
+                background: 'https://placehold.co/600x400?text=Team+Image+1',
+                character: 'https://placehold.co/600x400?text=Character+Image+1',
               },
             },
             {
               conversationID: 4,
-              character: 'Name1option2',
-              said: 'Hello,{playerName}',
+              character: 'NewFriend1',
+              said: 'I can help with defense and healing! You can count on me!',
               src: {
-                background: 'https://placehold.co/600x400?text=12',
-                character: 'https://placehold.co/600x400?text=13',
+                background: 'https://placehold.co/600x400?text=Character+Ability+Image',
+                character: 'https://placehold.co/600x400?text=Character+Image+3',
               },
             },
           ],
         },
       ],
+
       currentStoryIndex: 0,
       currentConversationIndex: 0,
       playerName: 'Player',
